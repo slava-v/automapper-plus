@@ -17,7 +17,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "spec\\AutoMapperPlus\\":  "spec/"
+            "spec\\AutoMapperPlus\\":  "spec/",
+            "spec\\Matchers\\": "spec/Matchers"
         }
     },
     "require": {
