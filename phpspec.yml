@@ -4,4 +4,6 @@ composer_suite_detection: true
 matchers:
     - spec\Matchers\BeTrueMatcher
     - spec\Matchers\BeFalseMatcher
-    - spec\Matchers\BeAnyOfMatcher
+
+extensions:
+    Karriere\PhpSpecMatchers\Extension: ~
