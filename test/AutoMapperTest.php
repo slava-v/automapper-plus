@@ -4,11 +4,14 @@ namespace AutoMapperPlus;
 
 use AutoMapperPlus\Configuration\AutoMapperConfig;
 use AutoMapperPlus\Configuration\AutoMapperConfigInterface;
+use AutoMapperPlus\Exception\InvalidMappingSourceException;
+use AutoMapperPlus\MappingOperation\Implementations\MapTo;
 use AutoMapperPlus\Test\CustomMapper\EmployeeMapper;
 use AutoMapperPlus\MappingOperation\Operation;
 use AutoMapperPlus\NameConverter\NamingConvention\CamelCaseNamingConvention;
 use AutoMapperPlus\NameConverter\NamingConvention\SnakeCaseNamingConvention;
 use AutoMapperPlus\NameResolver\CallbackNameResolver;
+use AutoMapperPlus\Test\Models\Employee\EmployeeAddressDto;
 use AutoMapperPlus\Test\Models\Inheritance\SourceChild;
 use AutoMapperPlus\Test\Models\Nested\Address;
 use AutoMapperPlus\Test\Models\Nested\AddressDto;
@@ -577,5 +580,125 @@ class AutoMapperTest extends TestCase
 
         $this->assertInstanceOf(AddressDto::class, $result);
         $this->assertEquals($result->streetAndNumber, $addressValue);
+    }
+
+    /**
+     * @expectedException \AutoMapperPlus\Exception\InvalidMappingSourceException
+     */
+    public function testArrayMapping_WithMapToOperation_Fails()
+    {
+        $addressValue = 'Main Street';
+        $addressKeyName = 'address1';
+
+        $addressValue2 = 'nr 10';
+        $addressKeyName2 = 'address2';
+
+        $employee = [
+            'id' => '1',
+            'firstName' => 'Josh',
+            'lastName' => 'Doe',
+            'age' => '99',
+            'notes' => 'bombibom',
+            'address' => [
+                'street' => 'asdf',
+                'number' => '123'
+            ]
+        ];
+
+        $config = new AutoMapperConfig();
+        $config->registerArrayMapping(EmployeeAddressDto::class)
+            ->forMember('address', Operation::mapTo(Address::class));
+
+        $mapper = new AutoMapper($config);
+
+
+        /** @var AddressDto $result */
+
+        $result = $mapper->map($employee, EmployeeAddressDto::class);
+
+        $this->expectException(InvalidMappingSourceException::class);
+    }
+
+    /**
+     *
+     */
+    public function testArrayMapping_WithMapToOperation_NoCollection_Success()
+    {
+        $addressStreet = 'Main Street';
+        $addressNumber = 123;
+
+        $employee = [
+            'id'        => '1',
+            'firstName' => 'Josh',
+            'lastName'  => 'Doe',
+            'age'       => '99',
+            'notes'     => 'bombibom',
+            'address'   => [
+                'street' => $addressStreet,
+                'number' => $addressNumber
+            ]
+        ];
+
+        $config = new AutoMapperConfig();
+        $config->registerArrayMapping(Address::class);
+        $config->registerArrayMapping(EmployeeAddressDto::class)
+               ->forMember('address', Operation::mapTo(Address::class, MapTo::COLLECTION_NOT_EXPECTED));
+
+        $mapper = new AutoMapper($config);
+
+
+        /** @var EmployeeAddressDto $result */
+        $result = $mapper->map($employee, EmployeeAddressDto::class);
+
+        $this->assertFalse(is_array($result->address));
+        $this->assertInstanceOf(Address::class, $result->address);
+        $this->assertEquals($addressStreet, $result->address->street);
+        $this->assertEquals($addressNumber, $result->address->number);
+    }
+
+    public function testArrayMapping_WithMapToOperation_Collection_Success()
+    {
+        $addressStreet = 'Main Street';
+        $addressNumber = 123;
+
+        $addressStreet2 = 'Second Road';
+        $addressNumber2 = 456;
+
+        $employee = [
+            'id'        => '1',
+            'firstName' => 'Josh',
+            'lastName'  => 'Doe',
+            'age'       => '99',
+            'notes'     => 'bombibom',
+            'address'   => [
+                [
+                    'street' => $addressStreet,
+                    'number' => $addressNumber
+                ],
+                [
+                    'street' => $addressStreet2,
+                    'number' => $addressNumber2
+                ]
+            ]
+        ];
+
+        $config = new AutoMapperConfig();
+        $config->registerArrayMapping(Address::class);
+        $config->registerArrayMapping(EmployeeAddressDto::class)
+               ->forMember('address', Operation::mapTo(Address::class, MapTo::COLLECTION_EXPECTED));
+
+        $mapper = new AutoMapper($config);
+
+
+        /** @var AddressDto $result */
+
+        $result = $mapper->map($employee, EmployeeAddressDto::class);
+
+
+        $this->assertTrue(is_array($result->address));
+        $this->assertCount(count($employee['address']), $result->address);
+        $this->assertInstanceOf(Address::class, $result->address[0]);
+        $this->assertEquals($addressStreet, $result->address[0]->street);
+        $this->assertEquals($addressNumber2, $result->address[1]->number);
     }
 }

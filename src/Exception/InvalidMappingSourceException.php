@@ -13,9 +13,9 @@ use Throwable;
 
 class InvalidMappingSourceException extends \Exception
 {
-    public function __construct($source, string $message = "", int $code = 0, Throwable $previous = null)
+    public function __construct($sourceType, $sourceValue, string $message = "", int $code = 0, Throwable $previous = null)
     {
-        $defaultMessage = 'Invalid mapping source ' . gettype($source) . ' specified. Only Array or Objects are accepted';
+        $defaultMessage = 'Invalid mapping source "' . $sourceType . '" with value "'.  print_r($sourceValue, true) .'" specified. Only Array or Objects are accepted';
 
         parent::__construct($message ?: $defaultMessage, $code, $previous);
     }

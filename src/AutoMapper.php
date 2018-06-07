@@ -55,7 +55,7 @@ class AutoMapper implements AutoMapperInterface
         $sourceTypeName = is_object($source) ? get_class($source) : gettype($source);
 
         if (!is_object($source) && !is_array($source)) {
-            throw new InvalidMappingSourceException($source);
+            throw new InvalidMappingSourceException($sourceTypeName, $source);
         }
 
         $mapping = $this->getMapping($sourceTypeName, $destinationClass);

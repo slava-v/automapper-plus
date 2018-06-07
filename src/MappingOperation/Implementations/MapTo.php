@@ -17,19 +17,29 @@ class MapTo extends DefaultMappingOperation implements MapperAwareOperation
 {
     use MapperAwareTrait;
 
+    const COLLECTION_EXPECTED = true;
+    const COLLECTION_NOT_EXPECTED = false;
+    const COLLECTION_AUTO = null;
+
     /**
      * @var string
      */
     private $destinationClass;
+    /**
+     * @var bool
+     */
+    private $isCollectionExpected;
 
     /**
      * MapTo constructor.
      *
      * @param string $destinationClass
+     * @param mixed   $isCollectionExpected - Has 3 possible values: NULL, FALSE, TRUE
      */
-    public function __construct(string $destinationClass)
+    public function __construct(string $destinationClass, $isCollectionExpected = null)
     {
         $this->destinationClass = $destinationClass;
+        $this->isCollectionExpected = $isCollectionExpected;
     }
 
     /**
@@ -50,9 +60,15 @@ class MapTo extends DefaultMappingOperation implements MapperAwareOperation
             $this->getSourcePropertyName($propertyName)
         );
 
-        return $this->isCollection($value)
-            ? $this->mapper->mapMultiple($value, $this->destinationClass)
-            : $this->mapper->map($value, $this->destinationClass);
+        if ($this->isCollectionExpected === null)
+            return $this->isCollection($value)
+                ? $this->mapper->mapMultiple($value, $this->destinationClass)
+                : $this->mapper->map($value, $this->destinationClass);
+        else {
+            return $this->isCollectionExpected === true
+                ? $this->mapper->mapMultiple($value, $this->destinationClass)
+                : $this->mapper->map($value, $this->destinationClass);
+        }
     }
 
     /**

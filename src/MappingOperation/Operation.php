@@ -60,11 +60,13 @@ class Operation
      * Map a property to a class.
      *
      * @param string $destinationClass
+     * @param null   $isCollectionExpected - 3 possible values NULL, TRUE, FALSE. See MapTo class
+     *
      * @return MapTo
      */
-    public static function mapTo(string $destinationClass): MapTo
+    public static function mapTo(string $destinationClass, $isCollectionExpected = null): MapTo
     {
-        return new MapTo($destinationClass);
+        return new MapTo($destinationClass, $isCollectionExpected);
     }
 
     /**
