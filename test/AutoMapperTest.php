@@ -587,12 +587,6 @@ class AutoMapperTest extends TestCase
      */
     public function testArrayMapping_WithMapToOperation_Fails()
     {
-        $addressValue = 'Main Street';
-        $addressKeyName = 'address1';
-
-        $addressValue2 = 'nr 10';
-        $addressKeyName2 = 'address2';
-
         $employee = [
             'id' => '1',
             'firstName' => 'Josh',
@@ -611,10 +605,7 @@ class AutoMapperTest extends TestCase
 
         $mapper = new AutoMapper($config);
 
-
-        /** @var AddressDto $result */
-
-        $result = $mapper->map($employee, EmployeeAddressDto::class);
+        $mapper->map($employee, EmployeeAddressDto::class);
 
         $this->expectException(InvalidMappingSourceException::class);
     }
